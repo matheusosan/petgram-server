@@ -49,8 +49,8 @@ export class AuthService {
       .cookie('access_token', access_token, {
         httpOnly: true,
         secure: true,
-        domain: 'https://petgram-client.vercel.app',
-        maxAge: 60 * 60 * 100 * 100,
+        domain: 'petgram-client.vercel.app',
+        maxAge: 1000 * 60 * 60 * 24 * 7,
         sameSite: 'none',
       })
       .send({ status: 'ok' });
