@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { S3 } from 'aws-sdk';
 
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from 'src/database/prisma.service';
 
 @Injectable()
 export class UploadService {
@@ -10,10 +9,7 @@ export class UploadService {
     region: this.configService.getOrThrow('AWS_S3_REGION'),
   });
 
-  constructor(
-    private readonly configService: ConfigService,
-    private readonly prisma: PrismaService,
-  ) {
+  constructor(private readonly configService: ConfigService) {
     this.s3Client = new S3();
   }
 
@@ -26,9 +22,5 @@ export class UploadService {
 
     const result = await this.s3Client.upload(upload).promise();
     return result.Location;
-  }
-
-  async getAll() {
-    return await this.prisma.post.findMany({});
   }
 }

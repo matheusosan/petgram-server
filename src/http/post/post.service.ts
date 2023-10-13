@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/database/prisma.service';
-import { UploadService } from './upload.service';
+import { PrismaService } from 'src/http/database/prisma.service';
+import { UploadService } from '../upload/upload.service';
 import { CreatePostDto } from './dto/create-post-dto';
 
 @Injectable()
@@ -17,9 +17,14 @@ export class PostService {
       data: {
         photoUrl,
         description: createPostDto.description,
+        authorId: createPostDto.authorId,
       },
     });
 
     return post;
+  }
+
+  async getAll() {
+    return await this.prisma.post.findMany({});
   }
 }
