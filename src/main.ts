@@ -18,7 +18,7 @@ async function bootstrap() {
       'Set-Cookie',
       'Access-Control-Allow-Origin	',
     ],
-    origin: 'http://localhost:3001',
+    origin: 'https://petgram-client.vercel.app/',
   });
   await app.listen(3000);
 }
