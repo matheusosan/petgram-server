@@ -39,20 +39,17 @@ export class AuthService {
 
     const payload = {
       sub: user.id,
-      username: user.username,
-      email: user.email,
     };
 
     const access_token = await this.jwtService.signAsync(payload);
 
-    response
-      .cookie('access_token', access_token, {
-        httpOnly: true,
-        secure: true,
-        domain: 'petgram-client.vercel.app',
-        maxAge: 1000 * 60 * 60 * 24 * 7,
-        sameSite: 'none',
-      })
-      .send({ status: 'ok' });
+    response.cookie('access_token', access_token, {
+      httpOnly: true,
+      secure: true,
+      domain: '.localhost',
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+      sameSite: 'lax',
+    });
+    return;
   }
 }
