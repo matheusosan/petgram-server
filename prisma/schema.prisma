@@ -21,6 +21,7 @@ model User {
 
 model Post {
   id Int @id @default(autoincrement())
+  filename String @unique
   description String?
   photoUrl String
 
