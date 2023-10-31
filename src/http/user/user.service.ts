@@ -3,9 +3,11 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/http/database/prisma.service';
 
-import { CreateUserDto } from './dto/create-user.dto';
+import { Request } from 'express';
 
+import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
+import { decode_token } from 'src/utils/decode_token';
 
 @Injectable()
 export class UserService {
@@ -42,6 +44,22 @@ export class UserService {
 
     return {
       ...createdUser,
+      password: undefined,
+    };
+  }
+
+  async findById(req: Request) {
+    const token = req.header('authorization');
+    const { id } = decode_token(token);
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    return {
+      ...user,
       password: undefined,
     };
   }
