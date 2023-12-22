@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
-import { PrismaService } from 'src/http/database/prisma.service';
-import { UploadService } from '../upload/upload.service';
+import { S3Service } from '../s3/s3.service';
 import { CreatePostDto } from './dto/create-post-dto';
 import { decode_token } from 'src/utils/decode_token';
+import { PostRepository } from './repositories/post.repository';
 
 @Injectable()
 export class PostService {
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly uploadService: UploadService,
+    private readonly postRepository: PostRepository,
+    private readonly uploadService: S3Service,
   ) {}
 
   async createPost(
@@ -17,39 +17,18 @@ export class PostService {
     createPostDto: CreatePostDto,
     req: Request,
   ) {
-    const token = req.header('authorization');
+    const { id } = decode_token(req.cookies.access_token);
+    const { description } = createPostDto;
     const { filename, url } = await this.uploadService.create(photo);
-    const { id } = decode_token(token);
 
-    console.log(id);
-
-    const post = await this.prisma.post.create({
-      data: {
-        filename,
-        photoUrl: url,
-        description: createPostDto.description,
-        authorId: Number(id),
-      },
-    });
-
-    return post;
+    return await this.postRepository.create(filename, url, description, id);
   }
 
   async getAll() {
-    const data = await this.prisma.post.findMany({
-      select: {
-        id: true,
-        description: true,
-        filename: true,
-        photoUrl: true,
-        author: {
-          select: {
-            username: true,
-          },
-        },
-      },
-    });
+    return await this.postRepository.getAllPosts();
+  }
 
-    return data;
+  async deleteById(id: string) {
+    await this.postRepository.deletePost(id);
   }
 }
