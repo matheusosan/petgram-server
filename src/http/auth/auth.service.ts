@@ -4,28 +4,25 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 
-import { Response, Request } from 'express';
+import { Response } from 'express';
 
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'src/http/database/prisma.service';
 
 import * as bcrypt from 'bcrypt';
+import { LoginDto } from './dto/login.dto';
+import { UserRepository } from '../user/repositories/user.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
   ) {}
 
-  async login(response: Response, request: Request) {
-    const { email, password } = request.body;
+  async login(response: Response, loginDto: LoginDto) {
+    const { email, password } = loginDto;
 
-    const user = await this.prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    const user = await this.userRepository.findByEmail(email);
 
     if (!user) {
       throw new NotFoundException('Usuário não encontrado');
@@ -45,7 +42,6 @@ export class AuthService {
 
     response.cookie('access_token', access_token, {
       httpOnly: true,
-      secure: true,
       domain: '.localhost',
       maxAge: 1000 * 60 * 60 * 24 * 7,
       sameSite: 'lax',
