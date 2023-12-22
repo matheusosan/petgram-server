@@ -1,8 +1,9 @@
-import { Controller, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Post, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from 'src/decorators/is-public.decorator';
 
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -11,9 +12,9 @@ export class AuthController {
   @Public()
   @Post('login')
   async login(
-    @Req() request: Request,
+    @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) response: Response,
   ) {
-    return await this.authService.login(response, request);
+    return await this.authService.login(response, loginDto);
   }
 }
