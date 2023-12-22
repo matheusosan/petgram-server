@@ -19,4 +19,9 @@ export class UserController {
   async findById(@Req() req: Request) {
     return await this.userService.findById(req);
   }
+
+  @Get('posts')
+  async getUserWithPosts(@Req() req: Request) {
+    return await this.userService.getUserWithPosts(req);
+  }
 }
