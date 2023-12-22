@@ -23,9 +23,11 @@ export class AuthGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromHeader(request);
+    const token = this.getCookieFromRequest(request);
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(
+        'Você precisa estar logado para realizar esta ação.',
+      );
     }
     try {
       const payload = await this.jwtService.verifyAsync(token, {
@@ -33,13 +35,15 @@ export class AuthGuard implements CanActivate {
       });
       request['user'] = payload;
     } catch {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Token expirado/inválido.');
     }
     return true;
   }
 
-  private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
+  private getCookieFromRequest(request: Request): string | undefined {
+    if (request.cookies && request.cookies.access_token) {
+      return request.cookies.access_token;
+    }
+    return null;
   }
 }
