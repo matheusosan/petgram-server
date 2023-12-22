@@ -1,19 +1,20 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'src/http/database/prisma.service';
+import { PrismaService } from 'src/database/prisma.service';
 
 import { Request } from 'express';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { decode_token } from 'src/utils/decode_token';
+import { UserRepository } from './repositories/user.repository';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly jwtService: JwtService,
+    private readonly userRepository: UserRepository,
   ) {}
 
   async create(data: CreateUserDto) {
@@ -22,45 +23,48 @@ export class UserService {
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(password, salt);
 
-    const userAlreadyExists = await this.prisma.user.findUnique({
-      where: {
-        email,
-
-        OR: [{ username }],
-      },
-    });
-
-    if (userAlreadyExists) {
-      throw new ConflictException('Usuário e/ou email já cadastrado');
-    }
-
-    const createdUser = await this.prisma.user.create({
-      data: {
-        email,
-        password: hashPassword,
-        username,
-      },
-    });
-
-    return {
-      ...createdUser,
-      password: undefined,
-    };
+    return await this.userRepository.create(email, username, hashPassword);
   }
 
   async findById(req: Request) {
-    const token = req.header('authorization');
-    const { id } = decode_token(token);
+    const { id } = decode_token(req.cookies.access_token);
+
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          id,
+        },
+      });
+
+      return {
+        ...user,
+        password: undefined,
+      };
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async getUserWithPosts(req: Request) {
+    const { id } = decode_token(req.cookies.access_token);
 
     const user = await this.prisma.user.findUnique({
       where: {
         id,
       },
+      select: {
+        username: true,
+        id: true,
+        posts: {
+          select: {
+            description: true,
+            id: true,
+            photoUrl: true,
+          },
+        },
+      },
     });
 
-    return {
-      ...user,
-      password: undefined,
-    };
+    return user;
   }
 }
