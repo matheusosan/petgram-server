@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
   Post,
   Req,
   UploadedFile,
@@ -10,14 +12,13 @@ import {
 import { PostService } from './post.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreatePostDto } from './dto/create-post-dto';
-import { UploadService } from 'src/http/upload/upload.service';
-import { Public } from 'src/decorators/is-public.decorator';
+import { S3Service } from 'src/http/s3/s3.service';
 import { Request } from 'express';
 
 @Controller('post')
 export class PostController {
   constructor(
-    private readonly uploadService: UploadService,
+    private readonly uploadService: S3Service,
     private readonly postService: PostService,
   ) {}
 
@@ -32,9 +33,13 @@ export class PostController {
     await this.postService.createPost(file, createPostDto, req);
   }
 
-  @Public()
   @Get()
   async get() {
     return await this.postService.getAll();
+  }
+
+  @Delete(':id')
+  async delete(@Param('id') id: string) {
+    await this.postService.deleteById(id);
   }
 }
