@@ -34,6 +34,26 @@ export class UserRepository {
     }
   }
 
+  async getAll() {
+    try {
+      const allUsers = await this.prisma.user.findMany({
+        select: {
+          id: true,
+          username: true,
+        },
+      });
+
+      return allUsers;
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        if (e.code === 'P2025') {
+          throw new NotFoundException('Dados não encontrados.');
+        }
+      }
+      throw new Error('Ocorreu um erro: ' + e);
+    }
+  }
+
   async findByEmail(email: string) {
     try {
       const user = await this.prisma.user.findUnique({
@@ -65,10 +85,12 @@ export class UserRepository {
   }
 
   async getUserAndPosts(id: number) {
+    const userId = Number(id);
+
     try {
       const user = await this.prisma.user.findUnique({
         where: {
-          id,
+          id: userId,
         },
         select: {
           username: true,
@@ -78,6 +100,9 @@ export class UserRepository {
               description: true,
               id: true,
               photoUrl: true,
+            },
+            orderBy: {
+              createdAt: 'desc',
             },
           },
         },

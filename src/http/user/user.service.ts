@@ -1,13 +1,11 @@
-import { ConflictException, Injectable } from '@nestjs/common';
-
-import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'src/database/prisma.service';
-
+import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
+import * as bcrypt from 'bcrypt';
+
+import { PrismaService } from 'src/database/prisma.service';
+import { decode_token } from 'src/utils/decode_token';
 
 import { CreateUserDto } from './dto/create-user.dto';
-import * as bcrypt from 'bcrypt';
-import { decode_token } from 'src/utils/decode_token';
 import { UserRepository } from './repositories/user.repository';
 
 @Injectable()
@@ -26,7 +24,11 @@ export class UserService {
     return await this.userRepository.create(email, username, hashPassword);
   }
 
-  async findById(req: Request) {
+  async getAllUsers() {
+    return await this.userRepository.getAll();
+  }
+
+  async getUserByCookie(req: Request) {
     const { id } = decode_token(req.cookies.access_token);
 
     try {
@@ -45,25 +47,8 @@ export class UserService {
     }
   }
 
-  async getUserWithPosts(req: Request) {
-    const { id } = decode_token(req.cookies.access_token);
-
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id,
-      },
-      select: {
-        username: true,
-        id: true,
-        posts: {
-          select: {
-            description: true,
-            id: true,
-            photoUrl: true,
-          },
-        },
-      },
-    });
+  async getUserWithPosts(id: number) {
+    const user = await this.userRepository.getUserAndPosts(id);
 
     return user;
   }
