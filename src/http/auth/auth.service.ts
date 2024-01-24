@@ -42,10 +42,28 @@ export class AuthService {
 
     response.cookie('access_token', access_token, {
       httpOnly: true,
+      secure: false,
       domain: '.localhost',
+      path: '/',
       maxAge: 1000 * 60 * 60 * 24 * 7,
       sameSite: 'lax',
     });
     return;
+  }
+
+  async logout(response: Response) {
+    try {
+      response.clearCookie('access_token', {
+        httpOnly: true,
+        secure: false,
+        domain: '.localhost',
+        path: '/',
+        sameSite: 'lax',
+      });
+      response.end();
+      return;
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

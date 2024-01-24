@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from 'src/decorators/is-public.decorator';
 
@@ -16,5 +16,10 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     return await this.authService.login(response, loginDto);
+  }
+
+  @Get('logout')
+  async logout(@Res({ passthrough: true }) response: Response) {
+    return await this.authService.logout(response);
   }
 }
