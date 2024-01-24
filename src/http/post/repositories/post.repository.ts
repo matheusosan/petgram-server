@@ -46,6 +46,9 @@ export class PostRepository {
             },
           },
         },
+        orderBy: {
+          createdAt: 'desc',
+        },
       });
 
       return data;
