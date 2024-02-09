@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { PrismaService } from 'src/database/prisma.service';
+import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
 export class UserRepository {
@@ -103,6 +103,18 @@ export class UserRepository {
             },
             orderBy: {
               createdAt: 'desc',
+            },
+          },
+          followedBy: {
+            select: {
+              username: true,
+              id: true,
+            },
+          },
+          following: {
+            select: {
+              username: true,
+              id: true,
             },
           },
         },

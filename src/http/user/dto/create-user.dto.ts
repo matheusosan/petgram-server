@@ -4,7 +4,7 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   @Min(3, {
-    message: 'O nome de usuário precisa conter no mínimo 2 caractéres.',
+    message: 'O nome de usuário precisa conter no mínimo 3 caractéres.',
   })
   username: string;
   @IsString()
