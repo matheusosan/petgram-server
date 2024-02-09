@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import * as bcrypt from 'bcrypt';
+import { decode_token } from '../../utils/decode_token';
 
-import { PrismaService } from 'src/database/prisma.service';
-import { decode_token } from 'src/utils/decode_token';
-
+import { PrismaService } from '../database/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserRepository } from './repositories/user.repository';
 
@@ -35,6 +34,10 @@ export class UserService {
       const user = await this.prisma.user.findUnique({
         where: {
           id,
+        },
+        select: {
+          id: true,
+          username: true,
         },
       });
 

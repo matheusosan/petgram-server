@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Get, Param, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { Public } from 'src/decorators/is-public.decorator';
+import { Public } from '../../decorators/is-public.decorator';
 import { Request } from 'express';
 
 @Controller('user')
@@ -14,7 +14,7 @@ export class UserController {
     return await this.userService.create(data);
   }
 
-  @Get('find')
+  @Get('authenticated')
   async getUserByCookie(@Req() req: Request) {
     return await this.userService.getUserByCookie(req);
   }
