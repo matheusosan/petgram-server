@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { Public } from 'src/decorators/is-public.decorator';
+import { Public } from '../../decorators/is-public.decorator';
 
 import { Response } from 'express';
 import { LoginDto } from './dto/login.dto';

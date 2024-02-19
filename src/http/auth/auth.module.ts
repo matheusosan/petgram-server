@@ -3,8 +3,8 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
-import { AuthGuard } from 'src/guards/auth.guard';
-import { PrismaService } from 'src/http/database/prisma.service';
+import { AuthGuard } from '../../guards/auth.guard';
+import { PrismaService } from '../../http/database/prisma.service';
 import { UserRepository } from '../user/repositories/user.repository';
 
 @Module({

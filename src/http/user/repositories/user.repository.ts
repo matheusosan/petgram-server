@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 
@@ -11,77 +7,96 @@ export class UserRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(email: string, username: string, hashPassword: string) {
-    try {
-      const createdUser = await this.prisma.user.create({
-        data: {
-          email,
-          password: hashPassword,
-          username,
-        },
-      });
+    const createdUser = await this.prisma.user.create({
+      data: {
+        email,
+        password: hashPassword,
+        username,
+      },
+    });
 
-      return {
-        ...createdUser,
-        password: undefined,
-      };
-    } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError) {
-        if (e.code === 'P2002') {
-          throw new ConflictException('Usuário já existe.');
-        }
-      }
-      throw new Error('Ocorreu um erro: ' + e);
-    }
+    return {
+      ...createdUser,
+      password: undefined,
+    };
+  }
+
+  async userExists(username: string, email: string) {
+    return await this.prisma.user.findUnique({
+      where: {
+        username,
+
+        OR: [{ email }],
+      },
+    });
   }
 
   async getAll() {
-    try {
-      const allUsers = await this.prisma.user.findMany({
-        select: {
-          id: true,
-          username: true,
-        },
-      });
+    const allUsers = await this.prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+      },
+    });
 
-      return allUsers;
-    } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError) {
-        if (e.code === 'P2025') {
-          throw new NotFoundException('Dados não encontrados.');
-        }
-      }
-      throw new Error('Ocorreu um erro: ' + e);
-    }
+    return allUsers;
   }
 
   async findByEmail(email: string) {
-    try {
-      const user = await this.prisma.user.findUnique({
-        where: {
-          email,
-        },
-      });
-      return user;
-    } catch (e) {
-      console.log(e);
-    }
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+    return user;
   }
 
   async findByUsername(username: string) {
-    try {
-      const user = await this.prisma.user.findUnique({
-        where: {
-          username,
-        },
-      });
+    const users = await this.prisma.user.findMany({
+      where: {
+        OR: [
+          {
+            username: {
+              contains: username,
+            },
+          },
+          {
+            username: {
+              contains: username.charAt(0).toUpperCase() + username.slice(1),
+            },
+          },
+          {
+            username: {
+              contains: username.charAt(0).toLowerCase() + username.slice(1),
+            },
+          },
+        ],
+      },
+      select: {
+        id: true,
+        username: true,
+      },
+      take: 5,
+    });
 
-      return {
-        ...user,
-        password: undefined,
-      };
-    } catch (e) {
-      throw e;
-    }
+    return users;
+  }
+
+  async findAuthenticatedUser(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        username: true,
+      },
+    });
+
+    return {
+      ...user,
+      password: undefined,
+    };
   }
 
   async getUserAndPosts(id: number) {

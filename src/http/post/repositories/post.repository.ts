@@ -43,6 +43,7 @@ export class PostRepository {
           author: {
             select: {
               username: true,
+              id: true,
             },
           },
         },

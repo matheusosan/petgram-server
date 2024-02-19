@@ -12,7 +12,7 @@ import {
 import { PostService } from './post.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreatePostDto } from './dto/create-post-dto';
-import { S3Service } from 'src/http/s3/s3.service';
+import { S3Service } from '../s3/s3.service';
 import { Request } from 'express';
 
 @Controller('post')

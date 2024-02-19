@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, Req } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Req, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Public } from '../../decorators/is-public.decorator';
@@ -20,9 +20,14 @@ export class UserController {
   }
 
   @Public()
-  @Get('')
+  @Get('all')
   async getAllUsers() {
     return await this.userService.getAllUsers();
+  }
+
+  @Get(':username')
+  async findByUsername(@Param('username') username: string) {
+    return await this.userService.findByUsername(username);
   }
 
   @Get('posts/:id')
